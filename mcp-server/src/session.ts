@@ -31,6 +31,11 @@ export interface DebugSession {
 
 // In-memory session store (single session at a time)
 let activeSession: DebugSession | null = null;
+let logServerStopFn: (() => Promise<void>) | null = null;
+
+export function setLogServerStop(fn: () => Promise<void>): void {
+  logServerStopFn = fn;
+}
 
 async function git(cwd: string, ...args: string[]): Promise<string> {
   const { stdout } = await execFileAsync("git", args, { cwd });
@@ -176,13 +181,14 @@ export function setLogServer(port: number, pid: number): void {
 export async function endSession(): Promise<{ cleanedUp: boolean; message: string }> {
   const session = requireSession();
 
-  // Kill log server if running
-  if (session.logServerPid) {
+  // Stop log server if running
+  if (logServerStopFn) {
     try {
-      process.kill(session.logServerPid, "SIGTERM");
+      await logServerStopFn();
     } catch {
-      // Process may already be dead
+      // Best effort
     }
+    logServerStopFn = null;
   }
 
   // Restore git state: remove all instrumentation
@@ -219,11 +225,12 @@ export async function abortSession(): Promise<{ message: string }> {
     return { message: "No active session to abort." };
   }
 
-  // Kill log server
-  if (session.logServerPid) {
+  // Stop log server
+  if (logServerStopFn) {
     try {
-      process.kill(session.logServerPid, "SIGTERM");
+      await logServerStopFn();
     } catch { /* ignore */ }
+    logServerStopFn = null;
   }
 
   // Hard restore
