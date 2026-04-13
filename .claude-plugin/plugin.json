@@ -1,0 +1,8 @@
+{
+  "name": "pro-debugger",
+  "description": "Debug Mode for Claude Code — hypothesis-driven, evidence-based debugging with runtime log instrumentation and smart stack detection",
+  "version": "0.1.0",
+  "author": {
+    "name": "Amjad Khalfan Abdulla Al Sulaimani"
+  }
+}

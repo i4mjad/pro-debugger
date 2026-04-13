@@ -1,0 +1,9 @@
+{
+  "name": "pro-debugger",
+  "version": "0.1.0",
+  "description": "Debug Mode for Claude Code — hypothesis-driven debugging with runtime log instrumentation",
+  "private": true,
+  "workspaces": [
+    "mcp-server"
+  ]
+}
